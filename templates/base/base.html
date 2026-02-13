@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Recipe Platform{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="{% url 'recipes:recipe_list' %}">
+                    <span class="logo-icon">🍳</span>
+                    <span class="logo-text">RecipeAI</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'recipes:recipe_list' %}" class="nav-link">Recipes</a>
+                <a href="{% url 'chatbot:chat' %}" class="nav-link">AI Assistant</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'recipes:recipe_create' %}" class="nav-link btn-primary">Create Recipe</a>
+                    <a href="{% url 'accounts:logout' %}" class="nav-link">Logout</a>
+                    <span class="nav-user">👤 {{ user.username }}</span>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'accounts:register' %}" class="nav-link btn-primary">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 RecipeAI Platform. Built with Django & AI 🚀</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

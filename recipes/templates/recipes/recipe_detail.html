@@ -1,0 +1,182 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ recipe.title }} - RecipeAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <!-- Back Button -->
+        <a href="{% url 'recipes:recipe_list' %}" class="btn btn-outline" style="margin-bottom: 2rem;">← Back to Recipes</a>
+
+        <!-- Recipe Header -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                {% if recipe.image %}
+                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" style="width: 100%; border-radius: 15px; object-fit: cover;">
+                {% else %}
+                    <div style="width: 100%; height: 300px; background: var(--gradient-card); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 6rem;">
+                        🍳
+                    </div>
+                {% endif %}
+                <div>
+                    <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        {{ recipe.title }}
+                    </h1>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8;">{{ recipe.description }}</p>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="padding: 0.75rem 1rem; background: var(--bg-glass); border-radius: 10px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Author</div>
+                            <div style="font-weight: 600;">👤 {{ recipe.author.username }}</div>
+                        </div>
+                        <div style="padding: 0.75rem 1rem; background: var(--bg-glass); border-radius: 10px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Rating</div>
+                            <div style="font-weight: 600; color: #fbbf24;">⭐ {{ recipe.average_rating|floatformat:1 }} ({{ recipe.total_ratings }})</div>
+                        </div>
+                        <div style="padding: 0.75rem 1rem; background: var(--bg-glass); border-radius: 10px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Difficulty</div>
+                            <div style="font-weight: 600; text-transform: capitalize;">{{ recipe.difficulty }}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 10px;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏱️</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Prep Time</div>
+                            <div style="font-weight: 600;">{{ recipe.prep_time }} min</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 10px;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔥</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Cook Time</div>
+                            <div style="font-weight: 600;">{{ recipe.cook_time }} min</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--bg-glass); border-radius: 10px;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🍽️</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Servings</div>
+                            <div style="font-weight: 600;">{{ recipe.servings }}</div>
+                        </div>
+                    </div>
+
+                    {% if user == recipe.author %}
+                        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                            <a href="{% url 'recipes:recipe_edit' recipe.pk %}" class="btn btn-outline">✏️ Edit</a>
+                            <a href="{% url 'recipes:recipe_delete' recipe.pk %}" class="btn btn-outline" style="border-color: #ef4444; color: #ef4444;">🗑️ Delete</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Ingredients -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem;">📋 Ingredients</h2>
+            <ul style="list-style: none; padding: 0;">
+                {% for recipe_ingredient in recipe.recipe_ingredients.all %}
+                    <li style="padding: 1rem; margin-bottom: 0.5rem; background: var(--bg-glass); border-radius: 10px; border-left: 3px solid var(--primary);">
+                        <strong style="color: var(--primary);">{{ recipe_ingredient.quantity }}</strong> 
+                        {{ recipe_ingredient.ingredient.name }}
+                        {% if recipe_ingredient.notes %}
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;"> - {{ recipe_ingredient.notes }}</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Instructions -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem;">👨‍🍳 Instructions</h2>
+            <div style="white-space: pre-line; line-height: 1.8; color: var(--text-secondary);">{{ recipe.instructions }}</div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem;">⭐ Reviews</h2>
+            
+            {% if user.is_authenticated %}
+                {% if user_review %}
+                    <div style="padding: 1.5rem; background: var(--bg-glass); border-radius: 10px; margin-bottom: 1.5rem;">
+                        <h3 style="margin-bottom: 1rem;">Your Review</h3>
+                        <div style="margin-bottom: 0.5rem;">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= user_review.rating %}
+                                    <span class="star">⭐</span>
+                                {% else %}
+                                    <span class="star empty">☆</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <p style="color: var(--text-secondary);">{{ user_review.comment|default:"No comment" }}</p>
+                    </div>
+                {% else %}
+                    <form method="post" style="padding: 1.5rem; background: var(--bg-glass); border-radius: 10px; margin-bottom: 1.5rem;">
+                        {% csrf_token %}
+                        <h3 style="margin-bottom: 1rem;">Write a Review</h3>
+                        <div class="form-group">
+                            <label class="form-label">Rating</label>
+                            {{ review_form.rating }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comment</label>
+                            {{ review_form.comment }}
+                        </div>
+                        <button type="submit" class="btn btn-gradient">Submit Review</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">Please <a href="{% url 'admin:login' %}" style="color: var(--primary);">login</a> to write a review.</p>
+            {% endif %}
+
+            <div style="margin-top: 2rem;">
+                {% for review in reviews %}
+                    <div style="padding: 1.5rem; background: var(--bg-glass); border-radius: 10px; margin-bottom: 1rem; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>{{ review.user.username }}</strong>
+                            <div>
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <span class="star">⭐</span>
+                                    {% else %}
+                                        <span class="star empty">☆</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary);">{{ review.comment|default:"No comment" }}</p>
+                        <small style="color: var(--text-secondary);">{{ review.created_at|date:"M d, Y" }}</small>
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No reviews yet. Be the first to review!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Similar Recipes -->
+        {% if similar_recipes %}
+        <div class="card">
+            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem;">🔗 Similar Recipes</h2>
+            <div class="recipes-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                {% for similar in similar_recipes %}
+                    <div class="recipe-card" onclick="window.location.href='{% url 'recipes:recipe_detail' similar.pk %}'">
+                        {% if similar.image %}
+                            <img src="{{ similar.image.url }}" alt="{{ similar.title }}" class="recipe-card-image">
+                        {% else %}
+                            <div class="recipe-card-image" style="display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                                🍳
+                            </div>
+                        {% endif %}
+                        <div class="recipe-card-body">
+                            <h3 class="recipe-card-title" style="font-size: 1.1rem;">{{ similar.title }}</h3>
+                            <div class="recipe-card-rating" style="margin-top: auto; padding-top: 0.5rem;">
+                                ⭐ {{ similar.average_rating|floatformat:1 }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

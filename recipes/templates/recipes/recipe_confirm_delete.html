@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Delete Recipe - RecipeAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div class="card">
+            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 2rem; margin-bottom: 1rem; color: #ef4444;">
+                ⚠️ Delete Recipe
+            </h1>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                Are you sure you want to delete "<strong>{{ recipe.title }}</strong>"? This action cannot be undone.
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn" style="background: #ef4444; color: white; flex: 1;">
+                        Yes, Delete
+                    </button>
+                    <a href="{% url 'recipes:recipe_detail' recipe.pk %}" class="btn btn-outline" style="flex: 1;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Recipes - RecipeAI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Discover Amazing Recipes</h1>
+        <p class="page-subtitle">Explore our collection of AI-powered recipes</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <form method="get" action="{% url 'recipes:recipe_search' %}" class="search-form">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Search recipes, ingredients, or cuisines..." 
+                class="search-input"
+                value="{{ request.GET.q }}"
+            >
+            <button type="submit" class="btn btn-gradient">🔍 Search</button>
+        </form>
+    </div>
+
+    <!-- Filters -->
+    {% if categories %}
+    <div class="filters-container" style="margin: 2rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+        <a href="{% url 'recipes:recipe_list' %}" class="btn btn-outline">All</a>
+        {% for category in categories %}
+            <a href="?category={{ category.id }}" class="btn btn-outline">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Recipes Grid -->
+    {% if recipes %}
+        <div class="recipes-grid">
+            {% for recipe in recipes %}
+                <div class="recipe-card" onclick="window.location.href='{% url 'recipes:recipe_detail' recipe.pk %}'">
+                    {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-card-image">
+                    {% else %}
+                        <div class="recipe-card-image" style="display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+                            🍳
+                        </div>
+                    {% endif %}
+                    <div class="recipe-card-body">
+                        <h3 class="recipe-card-title">{{ recipe.title }}</h3>
+                        <p class="recipe-card-description">{{ recipe.description|truncatewords:20 }}</p>
+                        <div class="recipe-card-meta">
+                            <span class="recipe-card-author">👤 {{ recipe.author.username }}</span>
+                            <div class="recipe-card-rating">
+                                ⭐ {{ recipe.average_rating|floatformat:1 }}
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">({{ recipe.total_ratings }})</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                            <span>⏱️ {{ recipe.get_total_time }} min</span>
+                            <span>🍽️ {{ recipe.servings }} servings</span>
+                            {% if recipe.category %}
+                                <span>🏷️ {{ recipe.category.name }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination" style="margin-top: 3rem; display: flex; justify-content: center; gap: 1rem;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline">← Previous</a>
+            {% endif %}
+            <span style="padding: 0.75rem 1.5rem; color: var(--text-secondary);">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="card" style="text-align: center; padding: 4rem 2rem;">
+            <h2 style="margin-bottom: 1rem; color: var(--text-secondary);">No recipes found</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Be the first to create a recipe!</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'recipes:recipe_create' %}" class="btn btn-gradient">Create Recipe</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
