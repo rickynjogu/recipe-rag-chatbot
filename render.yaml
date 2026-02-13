@@ -1,0 +1,26 @@
+# Render Blueprint - Recipe Platform with RAG Chatbot
+# https://render.com/docs/blueprint-spec
+# Optional: use this for Infrastructure as Code, or set the same in the Dashboard.
+
+services:
+  - type: web
+    name: recipe-platform
+    runtime: python
+    region: oregon
+
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+
+    startCommand: gunicorn recipe_platform.wsgi:application
+
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: GEMINI_API_KEY
+        sync: false
+    # Add GEMINI_API_KEY in Render Dashboard → Environment (secret)
